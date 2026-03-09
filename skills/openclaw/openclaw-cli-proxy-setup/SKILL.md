@@ -1,6 +1,6 @@
 ---
 name: openclaw-cli-proxy-setup
-description: Install and configure CLIProxyAPI on macOS so OpenClaw can use a local multi-API proxy for Codex, Claude, Gemini, OpenAI-compatible providers, Volcengine Code Plan, Alibaba Bailian Code Plan, and other upstreams exposed through CLIProxyAPI. Use when the user asks to set up, reinstall, migrate, or repair a local CLIProxyAPI + OpenClaw integration, especially for multi-provider routing, launchd autostart, management UI access, account rotation, or OpenClaw model/provider wiring.
+description: Install, repair, or revise CLIProxyAPI on macOS so OpenClaw can use a local multi-provider proxy for Codex, Claude, Gemini, OpenAI-compatible providers, Volcengine Code Plan, Alibaba Bailian Code Plan, and other upstreams exposed through CLIProxyAPI. Use when the user asks to set up, reinstall, migrate, verify, or rewire a local CLIProxyAPI + OpenClaw integration, including launchd autostart, management UI access, provider aliases, model exposure, default model strategy, or OpenClaw model/provider wiring.
 ---
 
 # OpenClaw CLI Proxy Setup
@@ -9,8 +9,6 @@ Install CLIProxyAPI from the official GitHub release, run it as a local `launchd
 
 Treat this skill as OpenClaw-centric, not Codex-centric. Codex is only one possible upstream. The same workflow can support Claude, Gemini, Volcengine Code Plan, Alibaba Bailian Code Plan, and other providers if the final provider entries and model aliases are adjusted to match the user's actual routing plan.
 
-Use this skill for installation, service bootstrap, and first-time local wiring. If the service already exists and the main task is to revise provider aliases, model exposure, or default-model strategy, use `$openclaw-provider-mapping`.
-
 Prefer the safe path:
 - add a new OpenClaw provider
 - keep the current OpenClaw primary model unchanged
@@ -18,7 +16,19 @@ Prefer the safe path:
 
 Do not follow Linux/Docker tutorials verbatim on macOS. Use the official macOS binary release unless the user explicitly asks for another installation method.
 
-## Workflow
+## Choose The Path
+
+Use the same skill with different user instructions:
+- install or rebuild:
+  `用 $openclaw-cli-proxy-setup 给这台 Mac 安装或重装 CLIProxyAPI，并接到 OpenClaw`
+- remap providers or models:
+  `用 $openclaw-cli-proxy-setup 调整 OpenClaw 的 provider 映射、模型 alias 和默认模型策略`
+
+Choose the workflow based on the real task:
+- if CLIProxyAPI is missing, broken, or needs launchd/bootstrap work, use the install workflow
+- if CLIProxyAPI already exists and the main task is provider aliases, model exposure, fallback design, or default-model cutover, use the mapping workflow
+
+## Install Workflow
 
 1. Inspect the machine.
 2. Fetch the latest official CLIProxyAPI release metadata from GitHub.
@@ -147,6 +157,65 @@ Default behavior:
 
 This avoids breaking OpenClaw before the user adds provider accounts to CLIProxyAPI.
 
+## Mapping Workflow
+
+Use this path when CLIProxyAPI is already installed or mostly working and the user wants to revise provider wiring rather than reinstall the service.
+
+1. Inspect the current OpenClaw config and any existing CLIProxyAPI config.
+2. Identify which upstream providers the user actually wants to expose.
+3. Build or revise OpenClaw `models.providers` entries that point to the local CLIProxyAPI `/v1` endpoint.
+4. Add matching `agents.defaults.models` entries.
+5. Preserve the current primary model unless the user explicitly asks to switch defaults.
+6. Create a candidate config for any default-model cutover.
+7. Verify the exposed models against `/v1/models` and summarize any mismatch clearly.
+
+Check these first:
+- `~/.openclaw/openclaw.json`
+- any candidate OpenClaw config files the user already prepared
+- the CLIProxyAPI config file if available
+- `curl -sS -H "Authorization: Bearer <key>" http://127.0.0.1:8317/v1/models`
+
+If `/v1/models` is empty, call that out immediately. Mapping should follow what CLIProxyAPI actually exposes, not what the user hopes is available.
+
+Treat OpenClaw as a consumer of a local OpenAI-compatible endpoint. The main job is to make names line up cleanly.
+
+Prefer one stable local provider such as:
+
+```json
+"cliproxy-local": {
+  "baseUrl": "http://127.0.0.1:8317/v1",
+  "api": "openai-completions",
+  "apiKey": "<client-api-key>",
+  "models": [
+    { "id": "provider-alias/model-a", "name": "provider-alias/model-a" },
+    { "id": "provider-alias/model-b", "name": "provider-alias/model-b" }
+  ]
+}
+```
+
+Use the model IDs that OpenClaw should call, not necessarily the upstream raw names. If CLIProxyAPI rewrites or aliases names, mirror those aliases here.
+
+Common patterns:
+- direct codex-style aliases such as `gpt-5.3-codex`
+- claude aliases exposed through CLIProxyAPI
+- gemini aliases exposed through CLIProxyAPI
+- OpenAI-compatible aliases for Volcengine Code Plan or Alibaba Bailian Code Plan
+- provider-prefixed names when the user wants explicit routing separation
+
+When Volcengine Code Plan or Alibaba Bailian Code Plan are routed through OpenAI-compatible endpoints, treat them as compatible model aliases rather than assuming OpenClaw has native provider semantics for them.
+
+Always back up `~/.openclaw/openclaw.json` before editing.
+
+Prefer `jq` to patch JSON.
+
+Mapping defaults:
+- keep `agents.defaults.model.primary` unchanged
+- add new provider models under `agents.defaults.models`
+- generate a second candidate file if the user wants to switch the default model
+- only replace the primary model immediately when the user explicitly asks for it
+
+If multiple providers are being added at once, keep the naming consistent. Avoid mixing raw upstream IDs and aliases unless there is a concrete routing reason.
+
 ## Verify
 
 Check all of these:
@@ -165,6 +234,19 @@ Expected results:
 - `/management.html` returns HTML on `GET`; do not rely on `HEAD`, which may return `404`
 
 If the management page is missing, inspect the service logs and confirm it downloaded the control panel asset successfully.
+
+For mapping-only tasks, also verify:
+
+```bash
+jq '.models.providers, .agents.defaults.model, .agents.defaults.models' ~/.openclaw/openclaw.json
+curl -sS -H "Authorization: Bearer <key>" http://127.0.0.1:8317/v1/models
+```
+
+Check that:
+- the local provider exists
+- every new model in OpenClaw has a matching exposed model or alias in CLIProxyAPI
+- the chosen primary model is actually routable
+- fallback models are still valid
 
 ## Sandbox And Permissions
 
@@ -187,3 +269,9 @@ Tell the user:
 - that they still need to add one or more provider accounts in the management UI
 
 Only switch OpenClaw's default model to `cliproxy-local/...` after the user confirms accounts were added or explicitly asks to make CLIProxyAPI the default immediately.
+
+For mapping-only tasks, also tell the user:
+- which provider entries were added or changed
+- which model aliases are now available in OpenClaw
+- whether the default model was left unchanged or switched
+- any gaps between desired upstreams and the models currently exposed by CLIProxyAPI

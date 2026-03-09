@@ -1,4 +1,4 @@
 interface:
   display_name: "OpenClaw CLI Proxy Setup"
   short_description: "Install CLIProxyAPI as OpenClaw's local multi-provider proxy."
-  default_prompt: "Use $openclaw-cli-proxy-setup to install CLIProxyAPI, wire it to OpenClaw as a local multi-provider proxy, and verify the setup on this Mac."
+  default_prompt: "Use $openclaw-cli-proxy-setup to install, repair, or rewire CLIProxyAPI for OpenClaw as a local multi-provider proxy on this Mac."

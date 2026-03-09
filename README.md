@@ -21,7 +21,6 @@ Current categories:
 
 Current skills:
 - `openclaw-cli-proxy-setup`
-- `openclaw-provider-mapping`
 
 ## Install
 
@@ -29,14 +28,12 @@ Install a skill by repository + skill name:
 
 ```bash
 npx skills add https://github.com/hanfangyu/codex-skills --skill openclaw-cli-proxy-setup
-npx skills add https://github.com/hanfangyu/codex-skills --skill openclaw-provider-mapping
 ```
 
 Install a skill by direct folder URL:
 
 ```bash
 npx skills add https://github.com/hanfangyu/codex-skills/tree/main/skills/openclaw/openclaw-cli-proxy-setup
-npx skills add https://github.com/hanfangyu/codex-skills/tree/main/skills/openclaw/openclaw-provider-mapping
 ```
 
 After install, invoke it in Codex with:
@@ -44,7 +41,7 @@ After install, invoke it in Codex with:
 ```text
 Use $openclaw-cli-proxy-setup to install CLIProxyAPI, wire it to OpenClaw as a local multi-provider proxy, and verify the setup on this Mac.
 
-Use $openclaw-provider-mapping to add or revise provider mappings, model aliases, and default-model strategy after the local proxy already exists.
+Use $openclaw-cli-proxy-setup to adjust OpenClaw provider mappings, model aliases, and default-model strategy after the local proxy already exists.
 ```
 
 ## Catalog
@@ -52,9 +49,7 @@ Use $openclaw-provider-mapping to add or revise provider mappings, model aliases
 ### openclaw
 
 - `openclaw-cli-proxy-setup`
-  Installs CLIProxyAPI on macOS, registers it with `launchd`, adds a local OpenClaw provider, preserves the current default model, and verifies the local `/v1` API plus management UI for broader multi-provider routing across Codex, Claude, Gemini, Volcengine Code Plan, Alibaba Bailian Code Plan, and other compatible upstreams.
-- `openclaw-provider-mapping`
-  Revises OpenClaw provider entries, model aliases, and default-model strategy against an existing CLIProxyAPI instance so upstreams like Codex, Claude, Gemini, Volcengine Code Plan, Alibaba Bailian Code Plan, and other compatible providers map cleanly into OpenClaw.
+  Installs, repairs, or rewires CLIProxyAPI on macOS for OpenClaw, including launchd bootstrap, local `/v1` wiring, provider aliases, model mappings, and default-model strategy across Codex, Claude, Gemini, Volcengine Code Plan, Alibaba Bailian Code Plan, and other compatible upstreams.
 
 ## Adding New Skills
 
