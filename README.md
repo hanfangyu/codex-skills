@@ -10,6 +10,10 @@ skills/
     <skill-name>/
       SKILL.md
       agents/openai.yaml
+templates/
+  category-skill-template/
+scripts/
+  validate_skills.rb
 ```
 
 Current categories:
@@ -53,6 +57,40 @@ Use $openclaw-cli-proxy-setup to install CLIProxyAPI, wire it to OpenClaw, and v
 4. Prefer direct installation compatibility:
    store real skills under `skills/<category>/<skill-name>`.
 5. Update this README catalog when a new skill is added.
+
+## Template
+
+Use the starter template in:
+
+```text
+templates/category-skill-template/
+```
+
+Create a new skill by copying it into the target category path:
+
+```bash
+mkdir -p skills/<category>
+cp -R templates/category-skill-template skills/<category>/<skill-name>
+```
+
+Then replace:
+- `replace-with-skill-name` in `SKILL.md`
+- placeholder text in `SKILL.md`
+- `display_name`, `short_description`, and `default_prompt` in `agents/openai.yaml`
+
+The workflow validator only checks `skills/`, so placeholders are allowed inside `templates/`.
+
+## Validation
+
+Local validation:
+
+```bash
+ruby scripts/validate_skills.rb
+```
+
+CI validation:
+- GitHub Actions runs `.github/workflows/validate-skills.yml` on pushes to `main` and on pull requests.
+- The validator checks naming, required files, YAML frontmatter, missing metadata, and that `default_prompt` explicitly mentions the matching `$skill-name`.
 
 ## Notes
 

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Replace With Skill Display Name"
+  short_description: "Replace with a short user-facing description."
+  default_prompt: "Use $replace-with-skill-name to complete this workflow on the current machine."
