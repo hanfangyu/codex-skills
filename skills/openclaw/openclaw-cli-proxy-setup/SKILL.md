@@ -9,6 +9,8 @@ Install CLIProxyAPI from the official GitHub release, run it as a local `launchd
 
 Treat this skill as OpenClaw-centric, not Codex-centric. Codex is only one possible upstream. The same workflow can support Claude, Gemini, Volcengine Code Plan, Alibaba Bailian Code Plan, and other providers if the final provider entries and model aliases are adjusted to match the user's actual routing plan.
 
+Use this skill for installation, service bootstrap, and first-time local wiring. If the service already exists and the main task is to revise provider aliases, model exposure, or default-model strategy, use `$openclaw-provider-mapping`.
+
 Prefer the safe path:
 - add a new OpenClaw provider
 - keep the current OpenClaw primary model unchanged

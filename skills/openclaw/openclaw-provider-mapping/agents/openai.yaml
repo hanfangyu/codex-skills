@@ -1,0 +1,4 @@
+interface:
+  display_name: "OpenClaw Provider Mapping"
+  short_description: "Map multi-provider CLIProxyAPI routes into OpenClaw."
+  default_prompt: "Use $openclaw-provider-mapping to add or revise CLIProxyAPI provider mappings, model aliases, and OpenClaw model defaults on this machine."
