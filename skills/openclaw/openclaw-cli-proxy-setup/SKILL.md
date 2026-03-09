@@ -1,11 +1,11 @@
 ---
 name: openclaw-cli-proxy-setup
-description: Install and configure CLIProxyAPI on macOS so OpenClaw can use Codex through a local OpenAI-compatible proxy with multi-account rotation. Use when the user asks to set up, reinstall, migrate, or repair a local CLIProxyAPI + OpenClaw integration, especially for Codex OAuth accounts, launchd autostart, management UI access, or OpenClaw model/provider wiring.
+description: Install and configure CLIProxyAPI on macOS so OpenClaw can use a local multi-API proxy for Codex, Claude, Gemini, OpenAI-compatible providers, and other upstreams exposed through CLIProxyAPI. Use when the user asks to set up, reinstall, migrate, or repair a local CLIProxyAPI + OpenClaw integration, especially for multi-provider routing, launchd autostart, management UI access, account rotation, or OpenClaw model/provider wiring.
 ---
 
 # OpenClaw CLI Proxy Setup
 
-Install CLIProxyAPI from the official GitHub release, run it as a local `launchd` service, wire OpenClaw to the local `/v1` endpoint, and verify the setup without breaking the user's current default model before accounts are added.
+Install CLIProxyAPI from the official GitHub release, run it as a local `launchd` service, wire OpenClaw to the local `/v1` endpoint, and verify the setup as a general multi-API proxy without breaking the user's current default model before upstream accounts are added.
 
 Prefer the safe path:
 - add a new OpenClaw provider
@@ -23,7 +23,7 @@ Do not follow Linux/Docker tutorials verbatim on macOS. Use the official macOS b
 5. Register a `launchd` agent.
 6. Add a non-breaking OpenClaw provider that points at `http://127.0.0.1:8317/v1`.
 7. Verify `launchd`, port binding, `/v1/models`, and the management page.
-8. Hand the user the management URL and explain that Codex accounts still need to be added.
+8. Hand the user the management URL and explain that upstream provider accounts still need to be added.
 
 ## Inspect The Machine
 
@@ -65,7 +65,7 @@ gh release view --repo router-for-me/CLIProxyAPI --json tagName,assets
 
 6. Generate two secrets with `openssl rand -hex`:
 - one management secret for the management API/UI
-- one client API key used by OpenClaw
+- one client API key used by OpenClaw and other local clients
 
 7. Write `config/config.yaml` with these defaults unless the user requests otherwise:
 
@@ -124,22 +124,22 @@ Prefer `jq` to patch JSON. Add a provider like this:
   "api": "openai-completions",
   "apiKey": "<generated-client-api-key>",
   "models": [
-    { "id": "gpt-5.3-codex", "name": "gpt-5.3-codex" },
-    { "id": "gpt-5.2-codex", "name": "gpt-5.2-codex" },
-    { "id": "gpt-5.1-codex", "name": "gpt-5.1-codex" },
-    { "id": "gpt-5.4", "name": "gpt-5.4" }
+    { "id": "gpt-5.4", "name": "gpt-5.4" },
+    { "id": "gpt-5.3-codex", "name": "gpt-5.3-codex" }
   ]
 }
 ```
 
 Also add matching entries under `agents.defaults.models`.
 
+Treat the model list as user-specific configuration, not a universal default. Include only the model IDs the user actually plans to expose through CLIProxyAPI. Extend or replace the example with Claude, Gemini, or OpenAI-compatible aliases when those upstreams are part of the setup.
+
 Default behavior:
 - keep `agents.defaults.model.primary` unchanged
-- keep the user's current direct `openai-codex/...` path working
+- keep the user's current direct provider path working
 - create a second candidate file that switches primary to `cliproxy-local/gpt-5.3-codex` and uses the old direct model as fallback
 
-This avoids breaking OpenClaw before the user adds any Codex accounts to CLIProxyAPI.
+This avoids breaking OpenClaw before the user adds provider accounts to CLIProxyAPI.
 
 ## Verify
 
@@ -155,7 +155,7 @@ curl -sS http://127.0.0.1:8317/management.html | head -n 5
 Expected results:
 - `launchctl` shows `state = running`
 - `lsof` shows `cli-proxy-api` listening on `127.0.0.1:8317`
-- `/v1/models` may return `{"data":[],"object":"list"}` before any accounts are added
+- `/v1/models` may return `{"data":[],"object":"list"}` before any provider accounts are added
 - `/management.html` returns HTML on `GET`; do not rely on `HEAD`, which may return `404`
 
 If the management page is missing, inspect the service logs and confirm it downloaded the control panel asset successfully.
@@ -178,6 +178,6 @@ Tell the user:
 - where the config file is
 - the management page URL
 - the generated management secret
-- that they still need to add one or more Codex OAuth accounts in the management UI
+- that they still need to add one or more provider accounts in the management UI
 
 Only switch OpenClaw's default model to `cliproxy-local/...` after the user confirms accounts were added or explicitly asks to make CLIProxyAPI the default immediately.

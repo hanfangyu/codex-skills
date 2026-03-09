@@ -39,7 +39,7 @@ npx skills add https://github.com/hanfangyu/codex-skills/tree/main/skills/opencl
 After install, invoke it in Codex with:
 
 ```text
-Use $openclaw-cli-proxy-setup to install CLIProxyAPI, wire it to OpenClaw, and verify the local proxy on this Mac.
+Use $openclaw-cli-proxy-setup to install CLIProxyAPI, wire it to OpenClaw as a local multi-API proxy, and verify the setup on this Mac.
 ```
 
 ## Catalog
@@ -47,7 +47,7 @@ Use $openclaw-cli-proxy-setup to install CLIProxyAPI, wire it to OpenClaw, and v
 ### openclaw
 
 - `openclaw-cli-proxy-setup`
-  Installs CLIProxyAPI on macOS, registers it with `launchd`, adds a local OpenClaw provider, preserves the current default model, and verifies the local `/v1` API plus management UI.
+  Installs CLIProxyAPI on macOS, registers it with `launchd`, adds a local OpenClaw provider, preserves the current default model, and verifies the local `/v1` API plus management UI for broader multi-provider routing.
 
 ## Adding New Skills
 
