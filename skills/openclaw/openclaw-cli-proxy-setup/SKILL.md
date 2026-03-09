@@ -1,11 +1,13 @@
 ---
 name: openclaw-cli-proxy-setup
-description: Install and configure CLIProxyAPI on macOS so OpenClaw can use a local multi-API proxy for Codex, Claude, Gemini, OpenAI-compatible providers, and other upstreams exposed through CLIProxyAPI. Use when the user asks to set up, reinstall, migrate, or repair a local CLIProxyAPI + OpenClaw integration, especially for multi-provider routing, launchd autostart, management UI access, account rotation, or OpenClaw model/provider wiring.
+description: Install and configure CLIProxyAPI on macOS so OpenClaw can use a local multi-API proxy for Codex, Claude, Gemini, OpenAI-compatible providers, Volcengine Code Plan, Alibaba Bailian Code Plan, and other upstreams exposed through CLIProxyAPI. Use when the user asks to set up, reinstall, migrate, or repair a local CLIProxyAPI + OpenClaw integration, especially for multi-provider routing, launchd autostart, management UI access, account rotation, or OpenClaw model/provider wiring.
 ---
 
 # OpenClaw CLI Proxy Setup
 
 Install CLIProxyAPI from the official GitHub release, run it as a local `launchd` service, wire OpenClaw to the local `/v1` endpoint, and verify the setup as a general multi-API proxy without breaking the user's current default model before upstream accounts are added.
+
+Treat this skill as OpenClaw-centric, not Codex-centric. Codex is only one possible upstream. The same workflow can support Claude, Gemini, Volcengine Code Plan, Alibaba Bailian Code Plan, and other providers if the final provider entries and model aliases are adjusted to match the user's actual routing plan.
 
 Prefer the safe path:
 - add a new OpenClaw provider
@@ -132,7 +134,9 @@ Prefer `jq` to patch JSON. Add a provider like this:
 
 Also add matching entries under `agents.defaults.models`.
 
-Treat the model list as user-specific configuration, not a universal default. Include only the model IDs the user actually plans to expose through CLIProxyAPI. Extend or replace the example with Claude, Gemini, or OpenAI-compatible aliases when those upstreams are part of the setup.
+Treat the model list as user-specific configuration, not a universal default. Include only the model IDs the user actually plans to expose through CLIProxyAPI. Extend or replace the example with Claude, Gemini, OpenAI-compatible aliases, or provider-specific aliases for Volcengine Code Plan and Alibaba Bailian Code Plan when those upstreams are part of the setup.
+
+When Volcengine Code Plan or Alibaba Bailian Code Plan are involved, do not assume a built-in direct provider shape in OpenClaw. If the user is routing them through OpenAI-compatible endpoints or custom provider entries exposed by CLIProxyAPI, model them as the compatible aliases the user will actually call from OpenClaw.
 
 Default behavior:
 - keep `agents.defaults.model.primary` unchanged
