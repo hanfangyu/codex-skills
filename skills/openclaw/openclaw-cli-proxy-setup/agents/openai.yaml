@@ -1,0 +1,4 @@
+interface:
+  display_name: "OpenClaw CLI Proxy Setup"
+  short_description: "Install CLIProxyAPI as OpenClaw's local Codex proxy."
+  default_prompt: "Use $openclaw-cli-proxy-setup to install CLIProxyAPI, wire it to OpenClaw, and verify the local proxy on this Mac."
